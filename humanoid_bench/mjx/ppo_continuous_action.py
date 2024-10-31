@@ -301,16 +301,16 @@ def make_train(config, writer):
                     total_successes = state_info['total_successes'][info["returned_episode"][-1, :]]
                     
                     if len(timesteps) > 0:
-                        writer.add_scalar("train/episode_return", return_values.mean(), timesteps[-1])
-                        writer.add_scalar("train/episode_length", length_values.mean(), timesteps[-1])
+                        writer.add_scalar("train/episode_return", np.array(return_values.mean()), timesteps[-1])
+                        writer.add_scalar("train/episode_length", np.array(length_values.mean()), timesteps[-1])
                         num_samples = 500
                     
                         # Log the histogram of target distance
-                        writer.add_histogram("train/target_dist_left", target_dist_left[:num_samples], timesteps[-1])
-                        writer.add_histogram("train/target_dist_right", target_dist_right[:num_samples], timesteps[-1])
+                        writer.add_histogram("train/target_dist_left", np.array(target_dist_left[:num_samples]), timesteps[-1])
+                        writer.add_histogram("train/target_dist_right", np.array(target_dist_right[:num_samples]), timesteps[-1])
 
                         if len(total_successes) > 0: 
-                            writer.add_histogram("train/total_successes", total_successes, timesteps[-1])
+                            writer.add_histogram("train/total_successes", np.array(total_successes), timesteps[-1])
 
                         if timesteps[-1] // (config["NUM_STEPS"] * config["NUM_ENVS"]) % 100 == 0:
                             print("Saving model")
