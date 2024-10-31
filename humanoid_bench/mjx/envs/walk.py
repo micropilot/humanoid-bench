@@ -12,13 +12,11 @@ class HumanoidWalkPosControl(MjxEnv):
 
         collisions = kwargs.get('collisions', 'feet')
         act_control = kwargs.get('act_control', 'pos')
-        hands = kwargs.get('hands', 'both')
 
         path = "./humanoid_bench/assets/mjx/h1_pos_walk.xml"
 
         del kwargs['collisions']
         del kwargs['act_control']
-        del kwargs['hands']
 
         super().__init__(model=mujoco.MjModel.from_xml_path(path), **kwargs)
         self.q_pos_init = jp.array(
