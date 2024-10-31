@@ -15,7 +15,7 @@ def test_walk_task():
     state = env.reset(rng)
     
     # Print initial observation
-    print("Initial Observation:", state.obs)
+    print("Initial Observation:", state.obs.shape)
 
     # Run a sample episode
     for step in range(10):  # Test with a few steps

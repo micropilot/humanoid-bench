@@ -366,7 +366,7 @@ def main(_):
         dimO = 61
     elif env_name == 'h1_walk':
         dimU = 19
-        dimO = 44
+        dimO = 40
     else:
         raise ValueError("Unknown environment")
     config = {
