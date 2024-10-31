@@ -156,8 +156,8 @@ def make_train(config, writer):
                 def filter_nan_state(state):
                     return jnp.where(jnp.isnan(state), jnp.zeros_like(state), state)
 
-                obsv = jax.tree.map(filter_nan_state, obsv)
-                env_state = jax.tree.map(filter_nan_state, env_state)
+                obsv = jax.tree_map(filter_nan_state, obsv)
+                env_state = jax.tree_map(filter_nan_state, env_state)
 
                 transition = Transition(
                     done, action, value, reward, log_prob, last_obs, info
@@ -258,13 +258,13 @@ def make_train(config, writer):
                 ), "batch size must be equal to number of steps * number of envs"
                 permutation = jax.random.permutation(_rng, batch_size)
                 batch = (traj_batch, advantages, targets)
-                batch = jax.tree_util.tree.map(
+                batch = jax.tree_util.tree_map(
                     lambda x: x.reshape((batch_size,) + x.shape[2:]), batch
                 )
-                shuffled_batch = jax.tree_util.tree.map(
+                shuffled_batch = jax.tree_util.tree_map(
                     lambda x: jnp.take(x, permutation, axis=0), batch
                 )
-                minibatches = jax.tree_util.tree.map(
+                minibatches = jax.tree_util.tree_map(
                     lambda x: jnp.reshape(
                         x, [config["NUM_MINIBATCHES"], -1] + list(x.shape[1:])
                     ),
