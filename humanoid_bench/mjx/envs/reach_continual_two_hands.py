@@ -125,11 +125,11 @@ class HumanoidReachContinualTwoHands(Humanoid):
         dist_left = info['target_dist_left'] 
         dist_right = info['target_dist_right']
 
-        # reaching_reward_l1 = jp.where(dist_left < 1, x=1.0, y=0.0) + jp.where(dist_right < 1, x=1.0, y=0.0)
-        reaching_reward_l1 = jp.where(jp.logical_and(dist_left < 1, dist_right < 1), x=1.0, y=0.0)
-        reaching_reward_l1_bis = jp.where(jp.logical_and(dist_left < 0.5, dist_right < 0.5), x=1.0, y=0.0)
-        reaching_reward_l1_tris = jp.where(jp.logical_and(dist_left < 0.25, dist_right < 0.25), x=1.0, y=0.0)
-        reached_single_reward = jp.where(dist_left < 0.05, x=1.0, y=0.0) + jp.where(dist_right < 0.05, x=1.0, y=0.0)
+        # reaching_reward_l1 = jp.where(dist_left < 1, 1.0, 0.0) + jp.where(dist_right < 1, 1.0, 0.0)
+        reaching_reward_l1 = jp.where(jp.logical_and(dist_left < 1, dist_right < 1), 1.0, 0.0)
+        reaching_reward_l1_bis = jp.where(jp.logical_and(dist_left < 0.5, dist_right < 0.5), 1.0, 0.0)
+        reaching_reward_l1_tris = jp.where(jp.logical_and(dist_left < 0.25, dist_right < 0.25), 1.0, 0.0)
+        reached_single_reward = jp.where(dist_left < 0.05, 1.0, 0.0) + jp.where(dist_right < 0.05, 1.0, 0.0)
 
         # reward = healthy_reward - 0.0001 * motion_penalty - 0*dist_left - 0*dist_right + reaching_reward_l1 + 5 * reaching_reward_l1_bis + 0 * reached_single_reward + 1000.0 * info['success'] #+ 1e-4 * penalty
         reward = healthy_reward - 0.0001 * motion_penalty + 1 * reaching_reward_l1 + 1 * reaching_reward_l1_bis + 1 * reaching_reward_l1_tris + 1000.0 * info['success']
@@ -137,11 +137,11 @@ class HumanoidReachContinualTwoHands(Humanoid):
 
         # terminate if torso is out of range or body height is out of range
         height = data.data.qpos[2]
-        terminated = jp.where(height < 0.3, x=1.0, y=0.0)
-        terminated = jp.where(height > 1.8, x=1.0, y=terminated)
+        terminated = jp.where(height < 0.3, 1.0, 0.0)
+        terminated = jp.where(height > 1.8, 1.0, terminated)
         # out_of_range = self.check_out_of_range(info['hand_pos'])
-        # terminated = jp.where(out_of_range, x=1.0, y=terminated)
-        reward = jp.where(jp.isnan(reward), x=-1, y=reward)
+        # terminated = jp.where(out_of_range, 1.0, terminated)
+        reward = jp.where(jp.isnan(reward), -1, reward)
         return reward, terminated
 
 
