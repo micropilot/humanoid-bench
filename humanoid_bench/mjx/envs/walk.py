@@ -10,6 +10,7 @@ _WALK_SPEED = 1
 class HumanoidWalkPosControl(MjxEnv):
     def __init__(self, path="./unitree_h1/scene.xml", **kwargs):
         path = "./humanoid_bench/assets/mjx/h1_pos_walk.xml"
+
         super().__init__(model=mujoco.MjModel.from_xml_path(path), **kwargs)
         self.q_pos_init = jp.array(
             [0, 0, 0.98, 1, 0, 0, 0, 0, 0, -0.4, 0.8, -0.4, 0, 0, -0.4, 0.8, -0.4, 0, 0, 0, 0, 0, 0, 0, 0, 0]

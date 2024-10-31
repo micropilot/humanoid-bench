@@ -374,7 +374,7 @@ def main(_):
         'DIMO': dimO,
         "SAVE_FOLDER": save_folder,
         "LR": 3e-4, 
-        "NUM_ENVS": 32768, 
+        "NUM_ENVS": 8192, 
         "NUM_STEPS": 16, 
         "TOTAL_TIMESTEPS": 4e9,
         "UPDATE_EPOCHS": 4, 
@@ -387,18 +387,17 @@ def main(_):
         "MAX_GRAD_NORM": 0.5,
         "ACTIVATION": "tanh",
         "ENV_NAME": env_name,
-        "ENV_KWARGS": {'collisions': 'feet',
-                       'act_control': 'pos',
-                       'hands': 'both',
-                       # l1 and l2 are curriculum rewards
-                       'reward_weights_dict': {'alive': 1.0,
-                                               'vel': 1.0,
-                                               'l1_weight': 1.0,
-                                               'l1_dist': 0.05,
-                                               'l2_weight': 2.0,
-                                               'l2_dist': 0.3
-                                               }
-                       },
+        "ENV_KWARGS": {
+            'collisions': 'feet',        # Limit collisions to feet for stability
+            'act_control': 'pos',        # Position control for smoother movement in `h1_walk`
+            'reward_weights_dict': {
+                'alive': 1.0,            # Rewards for staying alive
+                'vel': 0.5,              # Emphasize forward velocity for walking behavior
+                'orientation': 0.2,      # Minor reward for maintaining orientation
+                'walk_dist': 1.0,        # Added reward weight to encourage forward movement
+                'efficiency': 0.5        # Penalize unnecessary actions to promote efficient movement
+            }
+        },
         "ANNEAL_LR": True,
         "NORMALIZE_ENV": True,
         "DEBUG": True,
