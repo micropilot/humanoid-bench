@@ -18,7 +18,7 @@ from wrappers import (
 from brax import envs
 from humanoid_bench.mjx.envs.reach_continual import HumanoidReachContinual
 from humanoid_bench.mjx.envs.reach_continual_two_hands import HumanoidReachContinualTwoHands
-
+from humanoid_bench.mjx.envs.walk import HumanoidWalkPosControl
 from flax_to_torch import flax_to_torch, TorchModel, TorchPolicy
 
 import os
@@ -33,6 +33,7 @@ flags.DEFINE_integer('seed', 0, 'Random seed.')
 
 envs.register_environment('h1_reach_continual', HumanoidReachContinual)
 envs.register_environment('h1_reach_continual_two_hands', HumanoidReachContinualTwoHands)
+envs.register_environment('h1_walk', HumanoidWalkPosControl)
 
 class ActorCritic(nn.Module):
     action_dim: Sequence[int]
@@ -356,13 +357,16 @@ def main(_):
     logdir = os.path.join(save_folder, "logs")
     writer = SummaryWriter(logdir)
 
-    env_name = "h1_reach_continual_two_hands"  # "h1_reach_continual" or "h1_reach_continual_two_hands"
+    env_name = "h1_walk"  # "h1_reach_continual" or "h1_reach_continual_two_hands"
     if env_name == 'h1_reach_continual':
         dimU = 19
         dimO = 55
     elif env_name == 'h1_reach_continual_two_hands':
         dimU = 19
         dimO = 61
+    elif env_name == 'h1_walk':
+        dimU = 19
+        dimO = 44
     else:
         raise ValueError("Unknown environment")
     config = {

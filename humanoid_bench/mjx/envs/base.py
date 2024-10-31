@@ -17,9 +17,9 @@ class Humanoid(MjxEnv):
 
         path = "./humanoid_bench/assets/mjx/scene_mjx_feet_collisions_two_targets_pos.xml"
 
-        del kwargs['collisions']
-        del kwargs['act_control']
-        del kwargs['hands']
+        # del kwargs['collisions']
+        # del kwargs['act_control']
+        # del kwargs['hands']
 
         mj_model = mujoco.MjModel.from_xml_path(path)
 
