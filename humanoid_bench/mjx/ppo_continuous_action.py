@@ -156,8 +156,8 @@ def make_train(config, writer):
                 def filter_nan_state(state):
                     return jnp.where(jnp.isnan(state), jnp.zeros_like(state), state)
 
-                obsv = jax.tree_map(filter_nan_state, obsv)
-                env_state = jax.tree_map(filter_nan_state, env_state)
+                obsv = jax.tree.map(filter_nan_state, obsv)
+                env_state = jax.tree.map(filter_nan_state, env_state)
 
                 transition = Transition(
                     done, action, value, reward, log_prob, last_obs, info
