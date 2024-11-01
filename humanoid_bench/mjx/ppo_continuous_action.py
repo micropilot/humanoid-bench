@@ -374,11 +374,11 @@ def main(_):
         'DIMO': dimO,
         "SAVE_FOLDER": save_folder,
         "LR": 3e-4, 
-        "NUM_ENVS": 8192, 
-        "NUM_STEPS": 16, 
-        "TOTAL_TIMESTEPS": 4e9,
-        "UPDATE_EPOCHS": 4, 
-        "NUM_MINIBATCHES": 32, 
+        "NUM_ENVS": 8,                 # Reduced number of parallel environments
+        "NUM_STEPS": 8,                # Reduced steps per environment
+        "TOTAL_TIMESTEPS": 1e5,        # Lower total timesteps for a faster test
+        "UPDATE_EPOCHS": 1,            # Only one epoch for quick testing
+        "NUM_MINIBATCHES": 1,          # Fewer minibatches
         "GAMMA": 0.99,
         "GAE_LAMBDA": 0.95,
         "CLIP_EPS": 0.2,
@@ -398,9 +398,9 @@ def main(_):
                 'efficiency': 0.5        # Penalize unnecessary actions to promote efficient movement
             }
         },
-        "ANNEAL_LR": True,
+        "ANNEAL_LR": False,
         "NORMALIZE_ENV": True,
-        "DEBUG": True,
+        "DEBUG": False,
         "SAVE_FOLDER": save_folder,
 
     }
