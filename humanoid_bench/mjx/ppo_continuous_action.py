@@ -89,7 +89,9 @@ def make_train(config, writer):
     config["MINIBATCH_SIZE"] = (
             config["NUM_ENVS"] * config["NUM_STEPS"] // config["NUM_MINIBATCHES"]
     )
+    print ("BraxGymnaxWrapper Start", flush=True)
     env, env_params = BraxGymnaxWrapper(config["ENV_NAME"], **config["ENV_KWARGS"]), None
+    print ("BraxGymnaxWrapper End", flush=True)
     env = LogWrapper(env)
     env = ClipAction(env)
     env = VecEnv(env)
@@ -107,12 +109,16 @@ def make_train(config, writer):
 
     def train(rng):
         # INIT NETWORK
+        print ("Network Init Start", flush=True)
         network = ActorCritic(
             action_dim=config['DIMU'], activation=config["ACTIVATION"]
         )
+        print ("Network Init End", flush=True)
         rng, _rng = jax.random.split(rng)
+        print ("Rng Init End", flush=True)
         init_x = jnp.zeros(config['DIMO'])
         network_params = network.init(_rng, init_x)
+        print ("Param Init End", flush=True)
         if config["ANNEAL_LR"]:
             tx = optax.chain(
                 optax.clip_by_global_norm(config["MAX_GRAD_NORM"]),
@@ -128,6 +134,7 @@ def make_train(config, writer):
             params=network_params,
             tx=tx,
         )
+        print ("Train State End", flush=True)
 
         # INIT ENV
         rng, _rng = jax.random.split(rng)
