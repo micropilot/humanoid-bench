@@ -48,11 +48,17 @@ class HumanoidWalkPosControl(MjxEnv):
         return below * above
 
     def reset(self, rng):
+        step_counter = 0 
+
         qpos = self.q_pos_init.copy()
         qvel = self.q_vel_init.copy()
+        
         data = self.pipeline_init(qpos, qvel)
         obs = self._get_obs(data.data)
-        state = State(data, obs, jp.zeros(()), jp.zeros(()), {}, {'rng': rng, 'step_counter': 0})
+        state = State(data, obs, jp.zeros(()), jp.zeros(()), {}, 
+                      {'rng': rng, 
+                       'step_counter': 0,
+                       'last_xfrc_applied': jp.zeros((self.sys.nbody, 6)),})
         return state
 
     def _get_obs(self, data) -> jp.ndarray:
