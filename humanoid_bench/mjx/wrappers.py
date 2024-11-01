@@ -114,19 +114,30 @@ class LogWrapper(GymnaxWrapper):
 
 class BraxGymnaxWrapper:
     def __init__(self, env_name, **kwargs):
+        print("A", flush=True)
         env = envs.get_environment(env_name=env_name, **kwargs)
+        print("B", flush=True)
         env = EpisodeWrapper(env, episode_length=1000, action_repeat=1)
+        print("C", flush=True)
         env = AutoResetWrapper(env)
+        print("D", flush=True)
         self._env = env
+        print("E", flush=True)
         self.action_size = env.action_size
+        print("F", flush=True)
         self.observation_size = (env.observation_size,)
+        print("G", flush=True)
 
     def reset(self, key, params=None):
+        print("1", flush=True)
         state = self._env.reset(key)
+        print("2", flush=True)
         return state.obs, state
 
     def step(self, key, state, action, params=None):
+        print("Aa", flush=True)
         next_state = self._env.step(state, action)
+        print("b", flush=True)
         return next_state.obs, next_state, next_state.reward, next_state.done > 0.5, {}
 
     def observation_space(self, params):
