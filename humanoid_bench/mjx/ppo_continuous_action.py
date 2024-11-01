@@ -407,9 +407,11 @@ def main(_):
     print("Position A", flush=True)
     rng = jax.random.PRNGKey(FLAGS.seed)
     print("Position B", flush=True)
-    train_jit = jax.jit(make_train(config, writer))
+    # train_jit = jax.jit(make_train(config, writer))
     print("Position C", flush=True)
-    out = train_jit(rng)
+    # out = train_jit(rng)
+    train = make_train(config, writer)
+    out = train(rng)
     print("Position D", flush=True)
 
     print("mean: ", out['runner_state'][1].env_state.mean.shape, flush=True)
