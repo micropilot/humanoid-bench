@@ -107,17 +107,92 @@ class HumanoidWalkPosControl(MjxEnv):
                 "upright": upright,
             }
 
+    def get_info(self, state, data):
+        """
+        Computes relevant metrics for the HumanoidWalkPosControl environment.
+
+        Args:
+            state: The current state of the environment.
+            data: The environment data from MuJoCo containing position, velocity, and other dynamic information.
+
+        Returns:
+            A dictionary of computed metrics related to the humanoid's walking stability, speed, and control.
+        """
+        # Get torso and head positions
+        torso_pos = data.data.xpos[1]
+        head_height = torso_pos[2]
+
+        # Center of mass velocity for forward movement
+        com_velocity = data.data.qvel[0]  # Forward velocity on x-axis
+        
+        # Stand upright status (based on torso orientation matrix)
+        uprightness = jp.array(data.data.xmat[1, -1])  # Orientation to measure uprightness
+
+        # Maximum joint velocity for control stability
+        max_joint_vel = jp.max(jp.abs(data.data.qvel[self.body_vel_idxs]))
+
+        # Define metrics for rewards
+        standing = self.tolerance(head_height, bounds=(_STAND_HEIGHT, float("inf")), margin=_STAND_HEIGHT / 4)
+        upright = self.tolerance(uprightness, bounds=(0.9, float("inf")), margin=1.9, value_at_margin=0, sigmoid="linear")
+
+        # Accumulate success if the humanoid maintains an upright, stable walk
+        is_standing = jp.where(standing * upright > 0.8, 1.0, 0.0)  # Threshold to consider "standing"
+        total_successes = state.info['total_successes'] + is_standing
+
+        return {
+            'head_height': head_height,
+            'com_velocity': com_velocity,
+            'uprightness': uprightness,
+            'max_joint_vel': max_joint_vel,
+            'standing': standing,
+            'upright': upright,
+            'is_standing': is_standing,
+            'total_successes': total_successes
+        }
+
 
     def unnorm_action(self, action):
         return (action + 1) / 2 * (self.high_action - self.low_action) + self.low_action
         
     def step(self, state: State, action: jp.ndarray) -> State:
-        action = self.unnorm_action(action)
-        rng, subkey = jax.random.split(state.info['rng'])
-        xfrc_applied = jp.zeros((self.sys.nbody, 6))
-        data = perturbed_pipeline_step(self.sys, state.pipeline_state, action, xfrc_applied, self._n_frames)
+        """Runs one timestep of the environment's dynamics."""
 
-        obs = self._get_obs(data.data)
-        reward, terminated = self.compute_reward(data, state.info)
-        state.info.update(rng=rng, step_counter=state.info['step_counter'] + 1)
-        return state.replace(pipeline_state=data, obs=obs, reward=reward, done=terminated)
+        # Manage perturbations and actions
+        rng, subkey = jax.random.split(state.info['rng'])
+        action = self.unnorm_action(action)
+
+        apply_every, hold_for, magnitude = 1, 1, 1
+        xfrc_applied = jax.lax.cond(
+            state.info['step_counter'] % apply_every == 0,
+            lambda _: jax.random.normal(subkey, shape=(self.sys.nbody, 6)) * magnitude,
+            lambda _: state.info['last_xfrc_applied'], operand=None
+        )
+        perturb = jax.lax.cond(
+            state.info['step_counter'] % apply_every < hold_for, lambda _: 1, lambda _: 0, operand=None
+        )
+        xfrc_applied = xfrc_applied * perturb
+
+        # Run dynamics with perturbed step
+        data = perturbed_pipeline_step(self.sys, state.pipeline_state, action, xfrc_applied, self._n_frames)
+        observation = self._get_obs(data.data)
+
+        # Call `get_info` to gather info without direct modification
+        log_info = self.get_info(state, data)
+
+        # Compute reward based on new data
+        reward, terminated = self.compute_reward(data, log_info)
+
+        # Update `state.info` consistently
+        state.info.update(
+            rng=rng,
+            step_counter=state.info['step_counter'] + 1,
+            last_xfrc_applied=xfrc_applied,
+        )
+        state.info.update(**log_info)
+
+        return state.replace(
+            pipeline_state=data,
+            obs=observation,
+            reward=reward,
+            done=terminated
+     )
