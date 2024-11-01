@@ -8,7 +8,7 @@ _STAND_HEIGHT = 1.65
 _WALK_SPEED = 1
 
 class HumanoidWalkPosControl(MjxEnv):
-    def __init__(self, path="./unitree_h1/scene.xml", **kwargs):
+    def __init__(self, path="./unitree_h1/scene.xml", reward_weights_dict=None, **kwargs):
 
         collisions = kwargs.get('collisions', 'feet')
         act_control = kwargs.get('act_control', 'pos')
@@ -27,6 +27,9 @@ class HumanoidWalkPosControl(MjxEnv):
         self._move_speed = _WALK_SPEED
         self.low_action = jp.array(self.sys.actuator_ctrlrange[:, 0])
         self.high_action = jp.array(self.sys.actuator_ctrlrange[:, 1])
+
+        assert reward_weights_dict is not None
+        self.reward_weight_dict = reward_weights_dict
 
     def tolerance(self, x, bounds=(0.0, 1.0), margin=0.0, value_at_margin=0.0, sigmoid="linear"):
         lower, upper = bounds
