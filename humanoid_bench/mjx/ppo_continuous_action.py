@@ -136,9 +136,11 @@ def make_train(config, writer):
 
         # TRAIN LOOP
         def _update_step(runner_state, unused):
-            
+            print("Training started", flush=True)
+
             # COLLECT TRAJECTORIES
             def _env_step(runner_state, unused):
+                print("Env Step Start", flush=True)
                 train_state, env_state, last_obs, rng = runner_state
 
                 # SELECT ACTION
@@ -164,6 +166,8 @@ def make_train(config, writer):
                     done, action, value, reward, log_prob, last_obs, info
                 )
                 runner_state = (train_state, env_state, obsv, rng)
+
+                print("Env Step End", flush=True)
 
                 return runner_state, transition
 
