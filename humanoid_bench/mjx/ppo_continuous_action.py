@@ -404,9 +404,13 @@ def main(_):
         "SAVE_FOLDER": save_folder,
 
     }
+    print("Position A", flush=True)
     rng = jax.random.PRNGKey(FLAGS.seed)
+    print("Position B", flush=True)
     train_jit = jax.jit(make_train(config, writer))
+    print("Position C", flush=True)
     out = train_jit(rng)
+    print("Position D", flush=True)
 
     print("mean: ", out['runner_state'][1].env_state.mean.shape, flush=True)
     print("var: ", out['runner_state'][1].env_state.var.shape, flush=True)
