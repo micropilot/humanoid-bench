@@ -113,8 +113,11 @@ class HumanoidWalkPosControl(MjxEnv):
         
     def step(self, state: State, action: jp.ndarray) -> State:
         action = self.unnorm_action(action)
-        data = perturbed_pipeline_step(self.sys, state.pipeline_state, action, jp.zeros((self.sys.nbody, 6)), self._n_frames)
-        terminated = self.get_terminated(state)
-        reward, info = self.compute_reward(data, state.info)
+        rng, subkey = jax.random.split(state.info['rng'])
+        xfrc_applied = jp.zeros((self.sys.nbody, 6))
+        data = perturbed_pipeline_step(self.sys, state.pipeline_state, action, xfrc_applied, self._n_frames)
+
         obs = self._get_obs(data.data)
-        return state.replace(pipeline_state=data, obs=obs, reward=reward, done=terminated, info=info)
+        reward, terminated = self.compute_reward(data, state.info)
+        state.info.update(rng=rng, step_counter=state.info['step_counter'] + 1)
+        return state.replace(pipeline_state=data, obs=obs, reward=reward, done=terminated)
