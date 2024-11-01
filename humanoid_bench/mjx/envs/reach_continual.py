@@ -92,17 +92,17 @@ class HumanoidReachContinual(Humanoid):
 
 
         dist = info['target_dist_left']
-        reaching_reward_l1 = jp.where(dist < 1, x=1.0, y=0.0)
+        reaching_reward_l1 = jp.where(dist < 1, 1.0, 0.0)
 
         reward = healthy_reward - 0.0001 * motion_penalty + 5 * reaching_reward_l1 + 1000.0 * info['success_left'] #+ 1e-4 * penalty
 
         # terminate if torso is out of range or body height is out of range
         height = data.data.qpos[2]
-        terminated = jp.where(height < 0.3, x=1.0, y=0.0)
-        terminated = jp.where(height > 1.8, x=1.0, y=terminated)
+        terminated = jp.where(height < 0.3, 1.0, 0.0)
+        terminated = jp.where(height > 1.8, 1.0, terminated)
         # out_of_range = self.check_out_of_range(info['hand_pos'])
-        # terminated = jp.where(out_of_range, x=1.0, y=terminated)
-        reward = jp.where(jp.isnan(reward), x=-1, y=reward)
+        # terminated = jp.where(out_of_range, 1.0, terminated)
+        reward = jp.where(jp.isnan(reward), -1, reward)
         return reward, terminated
 
 

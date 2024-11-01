@@ -4,7 +4,7 @@
     </option>
     <include file="../common/visual.xml"/>
     <include file="../common/floor.xml"/>
-    <include file="./h1_pos.xml"/>
+    <include file="h1_mjx_feet_collisions_pos.xml"/>
     <keyframe>
         <key name="qpos0" qpos="0 0 0.98 1 0 0 0 0 0 -0.4 0.8 -0.4 0 0 -0.4 0.8 -0.4 0 0 0 0 0 0 0 0 0"/>
     </keyframe>

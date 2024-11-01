@@ -1,6 +1,7 @@
 import jax
 import jax.numpy as jp
 from jax.random import PRNGKey
+from humanoid_bench.mjx.envs.reach_continual import HumanoidReachContinual
 from humanoid_bench.mjx.envs.walk import HumanoidWalkPosControl
 
 def test_walk_task():
@@ -9,7 +10,18 @@ def test_walk_task():
 
 
     # Initialize the environment
-    env = HumanoidWalkPosControl()
+    # env = HumanoidReachContinual(collisions='feet', 
+    #                              act_control='pos', 
+    #                              hands='both',
+    #                              reward_weights_dict= {
+    #                                 'alive': 1.0,            # Rewards for staying alive
+    #                                 'vel': 0.5,              # Emphasize forward velocity for walking behavior
+    #                                 'orientation': 0.2,      # Minor reward for maintaining orientation
+    #                                 'walk_dist': 1.0,        # Added reward weight to encourage forward movement
+    #                                 'efficiency': 0.5        # Penalize unnecessary actions to promote efficient movement
+    #                             })
+    env = HumanoidWalkPosControl(collisions='feet', act_control='pos', 
+                                 reward_weights_dict={})
     
     # Reset the environment to get initial state
     state = env.reset(rng)

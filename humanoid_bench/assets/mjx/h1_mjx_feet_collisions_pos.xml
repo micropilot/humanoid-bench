@@ -222,5 +222,6 @@
   <sensor>
     <touch name="left_foot_sensor" site="left_foot"/>
     <touch name="right_foot_sensor" site="right_foot"/>
+    <subtreelinvel name="pelvis_subtreelinvel" body="pelvis"/>
   </sensor>
 </mujoco>

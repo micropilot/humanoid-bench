@@ -70,6 +70,7 @@ if __name__ == "__main__":
     while True:
         action = env.action_space.sample()
         ob, rew, terminated, truncated, info = env.step(action)
+        print ("finding", env.data.actuator_force.shape)
         img = env.render()
         ret += rew
 

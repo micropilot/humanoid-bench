@@ -57,6 +57,7 @@ class Walk(Task):
             value_at_margin=0,
         )
         stand_reward = standing * upright
+        print ("true", self.robot.actuator_forces())
         small_control = rewards.tolerance(
             self.robot.actuator_forces(),
             margin=10,
