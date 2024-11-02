@@ -353,7 +353,7 @@ def main(_):
         "LR": 3e-4, 
         "NUM_ENVS": 32768, 
         "NUM_STEPS": 16, 
-        "TOTAL_TIMESTEPS": 4e9,
+        "TOTAL_TIMESTEPS": 1e9,
         "UPDATE_EPOCHS": 4, 
         "NUM_MINIBATCHES": 32, 
         "GAMMA": 0.99,

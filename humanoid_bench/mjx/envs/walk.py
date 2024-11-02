@@ -96,7 +96,7 @@ class HumanoidWalkPosControl(MjxEnv):
 
     def compute_reward(self, data):
         """ 
-        R(s, a) = stable x tol(v_x, (1,, +inf), 1)
+        R(s, a) = stable x tol(v_x, (1, +inf), 1)
         stable = stand x e 
         e = 0.2 x [ 4 + (1 / |u|) \sum_{i=1}^{n} tol(u_i, (0, 0), 10) ]
         stand = height x upright 
@@ -110,7 +110,7 @@ class HumanoidWalkPosControl(MjxEnv):
         standing = tolerance(
             head_height,
             bounds=(self._stand_height, float("inf")),
-            margin=self._stand_height / 4
+            margin=0.4125
         )
         
         # Upright calculation
@@ -134,10 +134,6 @@ class HumanoidWalkPosControl(MjxEnv):
         ).mean()
         small_control = (4 + small_control) / 5
 
-        # Movement calculation: `move_speed == 0` case
-        horizontal_velocity = data.data.qvel[:2]
-        dont_move = tolerance(horizontal_velocity, margin=2).mean()
-
         # Movement calculation: `move_speed != 0` case
         com_velocity = data.data.qvel[0]
         move = tolerance(
@@ -150,15 +146,12 @@ class HumanoidWalkPosControl(MjxEnv):
         move = (5 * move + 1) / 6
 
         # Calculate reward based on whether `move_speed` is 0 or not
-        reward = lax.cond(
-            self._move_speed != 0,
-            lambda _: small_control * stand_reward * move,
-            lambda _: small_control * stand_reward * dont_move,
-            operand=None
-        )
+        reward = small_control * stand_reward * move
 
         # Termination condition
         terminated = jp.where(data.data.qpos[2] < 0.2, 1.0, 0.0)
+        reward = jp.where(jp.isnan(reward), -1, reward)
+
         return reward, terminated
 
     def unnorm_action(self, action):

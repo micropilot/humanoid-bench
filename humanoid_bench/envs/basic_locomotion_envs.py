@@ -85,7 +85,6 @@ class Walk(Task):
             )
             move = (5 * move + 1) / 6
             reward = small_control * stand_reward * move
-            print ("reward", reward)
             return reward, {
                 "stand_reward": stand_reward,
                 "small_control": small_control,

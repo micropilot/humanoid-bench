@@ -35,11 +35,13 @@ def main(args):
         torch_model = TorchModel(55, 19)
     elif args.task == 'reach_two_hands':
         torch_model = TorchModel(61, 19)
+    elif args.task == 'walk':
+        torch_model = TorchModel(51, 19)
     torch_policy = TorchPolicy(torch_model)
 
-    model_name = "torch_model.pt"
-    mean_name = "mean.npy"
-    var_name = "var.npy"
+    model_name = "torch_model_204800.pt"
+    mean_name = "mean_204800.npy"
+    var_name = "var_204800.npy"
 
     if args.step is not None:
         model_name = model_name.split(".")[0] + f"_{args.step}." + model_name.split(".")[1]
@@ -73,7 +75,7 @@ def main(args):
                     break
             all_rewards.append(reward)
             all_videos.append(np.array(video))
-        make_grid_video_from_numpy(all_videos, 8, output_name=os.path.join(args.folder, "evaluation.mp4"), **{'fps': 50})
+        make_grid_video_from_numpy(all_videos, 1, output_name=os.path.join(args.folder, "evaluation.mp4"), **{'fps': 50})
         print("Rewards:", all_rewards)
     else:
         renderer = mujoco.Renderer(m, height=480, width=480)

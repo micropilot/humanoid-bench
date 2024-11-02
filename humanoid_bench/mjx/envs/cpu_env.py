@@ -137,6 +137,8 @@ class HumanoidNumpyEnv():
             dist = lef_hand_dist
         elif self.task == 'reach_two_hands':
             dist = np.max((lef_hand_dist, right_hand_dist))
+        elif self.task == 'walk':
+            dist = np.sqrt(np.square(data.qpos[0:2]).sum())
         reward = float(dist < 0.1) # Trained with 0.05, but 0.1 allows to evaluate the policy for a wider range of targets
         height = data.qpos[2]
         terminated = (height < 0.3) or (height > 1.2)
@@ -163,6 +165,15 @@ class HumanoidNumpyEnv():
                 right_target = np.clip(right_target, np.array([-2, -2, 0.5]), np.array([2, 2, 1.8]))
                 self.data.qpos[self.left_target_idxs] = left_target
                 self.data.qpos[self.right_target_idxs] = right_target
+                mujoco.mj_forward(self.model, self.data)
+        elif self.task == 'walk':
+            if self.data.qpos[0] > 2.0:
+                self.data.qpos[0] = -2.0
+                self.data.qpos[1] = 0.0
+                self.data.qpos[2] = 0.98
+                self.data.qvel[0] = 0.0
+                self.data.qvel[1] = 0.0
+                self.data.qvel[2] = 0.0
                 mujoco.mj_forward(self.model, self.data)
 
         return self._get_obs(self.data), reward, done, {}
@@ -191,5 +202,12 @@ class HumanoidNumpyEnv():
                     data.qpos.copy()[self.right_target_idxs] - offset
                 )
             )
+        elif self.task == 'walk':
+            return np.concatenate(
+                (
+                    data.qpos.copy()[self.body_idxs],
+                    data.qvel.copy()[self.body_vel_idxs]
+                )
+            )   
         else:
             raise NotImplementedError
