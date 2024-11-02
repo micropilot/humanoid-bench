@@ -32,6 +32,7 @@ def test_walk_task():
     # Run a sample episode
     for step in range(10):  # Test with a few steps
         action = jp.ones(env.low_action.shape) * 0.5 # Zero action for testing
+        print ("Action: ", action.shape)
         state = env.step(state, action)
         
         # Print the results of each step

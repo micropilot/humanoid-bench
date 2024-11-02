@@ -89,9 +89,7 @@ def make_train(config, writer):
     config["MINIBATCH_SIZE"] = (
             config["NUM_ENVS"] * config["NUM_STEPS"] // config["NUM_MINIBATCHES"]
     )
-    print ("BraxGymnaxWrapper Start", flush=True)
     env, env_params = BraxGymnaxWrapper(config["ENV_NAME"], **config["ENV_KWARGS"]), None
-    print ("BraxGymnaxWrapper End", flush=True)
     env = LogWrapper(env)
     env = ClipAction(env)
     env = VecEnv(env)
@@ -109,16 +107,12 @@ def make_train(config, writer):
 
     def train(rng):
         # INIT NETWORK
-        print ("Network Init Start", flush=True)
         network = ActorCritic(
             action_dim=config['DIMU'], activation=config["ACTIVATION"]
         )
-        print ("Network Init End", flush=True)
         rng, _rng = jax.random.split(rng)
-        print ("Rng Init End", flush=True)
         init_x = jnp.zeros(config['DIMO'])
         network_params = network.init(_rng, init_x)
-        print ("Param Init End", flush=True)
         if config["ANNEAL_LR"]:
             tx = optax.chain(
                 optax.clip_by_global_norm(config["MAX_GRAD_NORM"]),
@@ -134,7 +128,6 @@ def make_train(config, writer):
             params=network_params,
             tx=tx,
         )
-        print ("Train State End", flush=True)
 
         # INIT ENV
         rng, _rng = jax.random.split(rng)
@@ -143,11 +136,9 @@ def make_train(config, writer):
 
         # TRAIN LOOP
         def _update_step(runner_state, unused):
-            print("Training started", flush=True)
 
             # COLLECT TRAJECTORIES
             def _env_step(runner_state, unused):
-                print("Env Step Start", flush=True)
                 train_state, env_state, last_obs, rng = runner_state
 
                 # SELECT ACTION
@@ -173,8 +164,6 @@ def make_train(config, writer):
                     done, action, value, reward, log_prob, last_obs, info
                 )
                 runner_state = (train_state, env_state, obsv, rng)
-
-                print("Env Step End", flush=True)
 
                 return runner_state, transition
 
@@ -377,7 +366,7 @@ def main(_):
         dimO = 61
     elif env_name == 'h1_walk':
         dimU = 19
-        dimO = 40
+        dimO = 51
     else:
         raise ValueError("Unknown environment")
     config = {
@@ -401,13 +390,7 @@ def main(_):
         "ENV_KWARGS": {
             'collisions': 'feet',        # Limit collisions to feet for stability
             'act_control': 'pos',        # Position control for smoother movement in `h1_walk`
-            'reward_weights_dict': {
-                'alive': 1.0,            # Rewards for staying alive
-                'vel': 0.5,              # Emphasize forward velocity for walking behavior
-                'orientation': 0.2,      # Minor reward for maintaining orientation
-                'walk_dist': 1.0,        # Added reward weight to encourage forward movement
-                'efficiency': 0.5        # Penalize unnecessary actions to promote efficient movement
-            }
+            'reward_weights_dict': {}
         },
         "ANNEAL_LR": False,
         "NORMALIZE_ENV": True,
@@ -415,15 +398,11 @@ def main(_):
         "SAVE_FOLDER": save_folder,
 
     }
-    print("Position A", flush=True)
     rng = jax.random.PRNGKey(FLAGS.seed)
-    print("Position B", flush=True)
     # train_jit = jax.jit(make_train(config, writer))
-    print("Position C", flush=True)
     # out = train_jit(rng)
     train = make_train(config, writer)
     out = train(rng)
-    print("Position D", flush=True)
 
     print("mean: ", out['runner_state'][1].env_state.mean.shape, flush=True)
     print("var: ", out['runner_state'][1].env_state.var.shape, flush=True)
