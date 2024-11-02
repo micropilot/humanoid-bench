@@ -293,8 +293,8 @@ def make_train(config, writer):
                     
                     
                     if len(timesteps) > 0:
-                        writer.add_scalar("train/episode_return", return_values.mean(), timesteps[-1])
-                        writer.add_scalar("train/episode_length", length_values.mean(), timesteps[-1])
+                        writer.add_scalar("train/episode_return", np.array(return_values.mean()), timesteps[-1])
+                        writer.add_scalar("train/episode_length", np.array(length_values.mean()), timesteps[-1])
                     
                         if timesteps[-1] // (config["NUM_STEPS"] * config["NUM_ENVS"]) % 100 == 0:
                             print("Saving model")
