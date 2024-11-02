@@ -351,9 +351,9 @@ def main(_):
         'DIMO': dimO,
         "SAVE_FOLDER": save_folder,
         "LR": 3e-4, 
-        "NUM_ENVS": 32768, 
+        "NUM_ENVS": 128, 
         "NUM_STEPS": 16, 
-        "TOTAL_TIMESTEPS": 1e9,
+        "TOTAL_TIMESTEPS": 1e5,
         "UPDATE_EPOCHS": 4, 
         "NUM_MINIBATCHES": 32, 
         "GAMMA": 0.99,
@@ -367,7 +367,13 @@ def main(_):
         "ENV_KWARGS": {'collisions': 'feet',
                        'act_control': 'pos',
                        # l1 and l2 are curriculum rewards
-                       'reward_weights_dict': {}
+                       'reward_weights_dict': {'alive': 1.0,
+                                               'vel': 1.0,
+                                               'l1_weight': 1.0,
+                                               'l1_dist': 0.05,
+                                               'l2_weight': 2.0,
+                                               'l2_dist': 0.3
+                                               }
                        },
         "ANNEAL_LR": True,
         "NORMALIZE_ENV": True,

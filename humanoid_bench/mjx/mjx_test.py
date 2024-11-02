@@ -39,9 +39,9 @@ def main(args):
         torch_model = TorchModel(51, 19)
     torch_policy = TorchPolicy(torch_model)
 
-    model_name = "torch_model_204800.pt"
-    mean_name = "mean_204800.npy"
-    var_name = "var_204800.npy"
+    model_name = "torch_model_682065920.pt"
+    mean_name = "mean_682065920.npy"
+    var_name = "var_682065920.npy"
 
     if args.step is not None:
         model_name = model_name.split(".")[0] + f"_{args.step}." + model_name.split(".")[1]
