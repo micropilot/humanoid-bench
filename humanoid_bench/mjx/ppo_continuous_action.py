@@ -399,10 +399,8 @@ def main(_):
 
     }
     rng = jax.random.PRNGKey(FLAGS.seed)
-    # train_jit = jax.jit(make_train(config, writer))
-    # out = train_jit(rng)
-    train = make_train(config, writer)
-    out = train(rng)
+    train_jit = jax.jit(make_train(config, writer))
+    out = train_jit(rng)
 
     print("mean: ", out['runner_state'][1].env_state.mean.shape, flush=True)
     print("var: ", out['runner_state'][1].env_state.var.shape, flush=True)
