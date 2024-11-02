@@ -89,7 +89,12 @@ class HumanoidWalkPosControl(MjxEnv):
                       {'reward': zero},
                       {'rng': rng, 
                        'step_counter': step_counter,
-                       'last_xfrc_applied': jp.zeros((self.sys.nbody, 6))
+                       'last_xfrc_applied': jp.zeros((self.sys.nbody, 6)),
+                       "stand_reward": 0., 
+                       "small_control": 0., 
+                       "move": 0.,
+                       "standing": 0.,
+                       "upright": 0.
                        })
         
         return state
@@ -152,7 +157,13 @@ class HumanoidWalkPosControl(MjxEnv):
         terminated = jp.where(data.data.qpos[2] < 0.2, 1.0, 0.0)
         reward = jp.where(jp.isnan(reward), -1, reward)
 
-        return reward, terminated
+        sub_rewards = {"stand_reward": stand_reward, 
+                       "small_control": small_control, 
+                       "move": move,
+                       "standing": standing,
+                       "upright": upright}
+
+        return reward, terminated, sub_rewards
 
     def unnorm_action(self, action):
         return (action + 1) / 2 * (self.high_action - self.low_action) + self.low_action
@@ -183,7 +194,7 @@ class HumanoidWalkPosControl(MjxEnv):
         observation = self._get_obs(data.data)
 
         # Compute reward based on new data
-        reward, terminated = self.compute_reward(data)
+        reward, terminated, sub_rewards = self.compute_reward(data)
 
         # Update `state.info` consistently
         state.info.update(
@@ -191,6 +202,7 @@ class HumanoidWalkPosControl(MjxEnv):
             step_counter=state.info['step_counter'] + 1,
             last_xfrc_applied=xfrc_applied,
         )
+        state.info.update(**sub_rewards)
 
         return state.replace(
             pipeline_state=data,

@@ -291,10 +291,22 @@ def make_train(config, writer):
                         print(
                             f"global step={timesteps[t]}, episodic return={return_values[t]}, episodic length={length_values[t]}")
                     
+                    state_info = env_state.env_state.env_state.env_state.info
+                    
+                    stand_reward = state_info['stand_reward']
+                    small_control = state_info['small_control']
+                    move = state_info['move']
+                    standing = state_info['standing']
+                    upright = state_info['upright']
                     
                     if len(timesteps) > 0:
                         writer.add_scalar("train/episode_return", np.array(return_values.mean()), timesteps[-1])
                         writer.add_scalar("train/episode_length", np.array(length_values.mean()), timesteps[-1])
+                        writer.add_scalar("train/stand_reward", np.array(stand_reward.mean()), timesteps[-1])
+                        writer.add_scalar("train/small_control", np.array(small_control.mean()), timesteps[-1])
+                        writer.add_scalar("train/move", np.array(move.mean()), timesteps[-1])
+                        writer.add_scalar("train/standing", np.array(standing.mean()), timesteps[-1])
+                        writer.add_scalar("train/upright", np.array(upright.mean()), timesteps[-1])
                     
                         if timesteps[-1] // (config["NUM_STEPS"] * config["NUM_ENVS"]) % 100 == 0:
                             print("Saving model")
@@ -351,9 +363,9 @@ def main(_):
         'DIMO': dimO,
         "SAVE_FOLDER": save_folder,
         "LR": 3e-4, 
-        "NUM_ENVS": 32768, 
+        "NUM_ENVS": 32, 
         "NUM_STEPS": 16, 
-        "TOTAL_TIMESTEPS": 1e9,
+        "TOTAL_TIMESTEPS": 1e5,
         "UPDATE_EPOCHS": 4, 
         "NUM_MINIBATCHES": 32, 
         "GAMMA": 0.99,
