@@ -16,8 +16,7 @@ from wrappers import (
     ClipAction,
 )
 from brax import envs
-from humanoid_bench.mjx.envs.reach_continual import HumanoidReachContinual
-from humanoid_bench.mjx.envs.reach_continual_two_hands import HumanoidReachContinualTwoHands
+from humanoid_bench.mjx.envs.walk import HumanoidWalkPosControl
 
 from flax_to_torch import flax_to_torch, TorchModel, TorchPolicy
 
@@ -31,8 +30,7 @@ FLAGS = flags.FLAGS
 flags.DEFINE_string('job_name', None, 'Name of the job to be launched', required=True)
 flags.DEFINE_integer('seed', 0, 'Random seed.')
 
-envs.register_environment('h1_reach_continual', HumanoidReachContinual)
-envs.register_environment('h1_reach_continual_two_hands', HumanoidReachContinualTwoHands)
+envs.register_environment('h1_walk', HumanoidWalkPosControl)
 
 class ActorCritic(nn.Module):
     action_dim: Sequence[int]
@@ -292,26 +290,12 @@ def make_train(config, writer):
                     for t in range(min(len(timesteps), 5)):  # print first 5
                         print(
                             f"global step={timesteps[t]}, episodic return={return_values[t]}, episodic length={length_values[t]}")
-                        
-                    state_info = env_state.env_state.env_state.env_state.info
                     
-                    target_dist_left = state_info['target_dist_left']
-                    target_dist_right = state_info['target_dist_right']
-                    
-                    total_successes = state_info['total_successes'][info["returned_episode"][-1, :]]
                     
                     if len(timesteps) > 0:
                         writer.add_scalar("train/episode_return", return_values.mean(), timesteps[-1])
                         writer.add_scalar("train/episode_length", length_values.mean(), timesteps[-1])
-                        num_samples = 500
                     
-                        # Log the histogram of target distance
-                        writer.add_histogram("train/target_dist_left", target_dist_left[:num_samples], timesteps[-1])
-                        writer.add_histogram("train/target_dist_right", target_dist_right[:num_samples], timesteps[-1])
-
-                        if len(total_successes) > 0: 
-                            writer.add_histogram("train/total_successes", total_successes, timesteps[-1])
-
                         if timesteps[-1] // (config["NUM_STEPS"] * config["NUM_ENVS"]) % 100 == 0:
                             print("Saving model")
                             save_folder = config["SAVE_FOLDER"]
@@ -356,13 +340,10 @@ def main(_):
     logdir = os.path.join(save_folder, "logs")
     writer = SummaryWriter(logdir)
 
-    env_name = "h1_reach_continual_two_hands"  # "h1_reach_continual" or "h1_reach_continual_two_hands"
-    if env_name == 'h1_reach_continual':
+    env_name = "h1_walk" 
+    if env_name == 'h1_walk':
         dimU = 19
-        dimO = 55
-    elif env_name == 'h1_reach_continual_two_hands':
-        dimU = 19
-        dimO = 61
+        dimO = 51
     else:
         raise ValueError("Unknown environment")
     config = {
@@ -370,11 +351,11 @@ def main(_):
         'DIMO': dimO,
         "SAVE_FOLDER": save_folder,
         "LR": 3e-4, 
-        "NUM_ENVS": 32768, 
-        "NUM_STEPS": 16, 
-        "TOTAL_TIMESTEPS": 4e9,
+        "NUM_ENVS": 4, 
+        "NUM_STEPS": 4, 
+        "TOTAL_TIMESTEPS": 1e5,
         "UPDATE_EPOCHS": 4, 
-        "NUM_MINIBATCHES": 32, 
+        "NUM_MINIBATCHES": 4, 
         "GAMMA": 0.99,
         "GAE_LAMBDA": 0.95,
         "CLIP_EPS": 0.2,
@@ -385,15 +366,8 @@ def main(_):
         "ENV_NAME": env_name,
         "ENV_KWARGS": {'collisions': 'feet',
                        'act_control': 'pos',
-                       'hands': 'both',
                        # l1 and l2 are curriculum rewards
-                       'reward_weights_dict': {'alive': 1.0,
-                                               'vel': 1.0,
-                                               'l1_weight': 1.0,
-                                               'l1_dist': 0.05,
-                                               'l2_weight': 2.0,
-                                               'l2_dist': 0.3
-                                               }
+                       'reward_weights_dict': {}
                        },
         "ANNEAL_LR": True,
         "NORMALIZE_ENV": True,
