@@ -153,6 +153,15 @@ class HumanoidWalkPosControl(MjxEnv):
         # Calculate reward based on whether `move_speed` is 0 or not
         reward = small_control * stand_reward * move
 
+        # Calculate the squared sum of actuator forces (energy penalty)
+        actuator_effort = jp.sum(data.data.qfrc_actuator**2)
+
+        # Scale the penalty and subtract it from the reward
+        energy_efficiency_penalty = -0.001 * actuator_effort  # Adjust the weight as needed
+
+        # Integrate it into the reward
+        reward += energy_efficiency_penalty
+
         # Termination condition
         terminated = jp.where(data.data.qpos[2] < 0.2, 1.0, 0.0)
         reward = jp.where(jp.isnan(reward), -1, reward)
@@ -161,7 +170,8 @@ class HumanoidWalkPosControl(MjxEnv):
                        "small_control": small_control, 
                        "move": move,
                        "standing": standing,
-                       "upright": upright}
+                       "upright": upright,
+                       "energy_efficiency_penalty": energy_efficiency_penalty}
 
         return reward, terminated, sub_rewards
 
