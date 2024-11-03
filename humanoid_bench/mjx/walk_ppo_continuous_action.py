@@ -311,7 +311,7 @@ def make_train(config, writer):
                         writer.add_scalar("train/upright", np.array(upright.mean()), timesteps[-1])
                         writer.add_scalar("train/actuator_effort", np.array(actuator_effort.mean()), timesteps[-1])
                         writer.add_scalar("train/energy_efficiency_penalty", np.array(energy_efficiency_penalty.mean()), timesteps[-1])
-                        
+
                         if timesteps[-1] // (config["NUM_STEPS"] * config["NUM_ENVS"]) % 100 == 0:
                             print("Saving model")
                             save_folder = config["SAVE_FOLDER"]
@@ -367,9 +367,9 @@ def main(_):
         'DIMO': dimO,
         "SAVE_FOLDER": save_folder,
         "LR": 3e-4, 
-        "NUM_ENVS": 32768, 
+        "NUM_ENVS": 128, 
         "NUM_STEPS": 16, 
-        "TOTAL_TIMESTEPS": 1e9,
+        "TOTAL_TIMESTEPS": 1e6,
         "UPDATE_EPOCHS": 4, 
         "NUM_MINIBATCHES": 32, 
         "GAMMA": 0.99,
