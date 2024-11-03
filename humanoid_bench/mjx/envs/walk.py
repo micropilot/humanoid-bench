@@ -94,7 +94,8 @@ class HumanoidWalkPosControl(MjxEnv):
                        "small_control": 0., 
                        "move": 0.,
                        "standing": 0.,
-                       "upright": 0.
+                       "upright": 0.,
+                       "actuator_effort": 0.
                        })
         
         return state
