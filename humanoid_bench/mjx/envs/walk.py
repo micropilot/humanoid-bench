@@ -171,7 +171,7 @@ class HumanoidWalkPosControl(MjxEnv):
                        "move": move,
                        "standing": standing,
                        "upright": upright,
-                       "energy_efficiency_penalty": energy_efficiency_penalty}
+                       "actuator_effort": actuator_effort}
 
         return reward, terminated, sub_rewards
 
