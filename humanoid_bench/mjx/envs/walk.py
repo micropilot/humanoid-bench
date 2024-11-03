@@ -158,7 +158,7 @@ class HumanoidWalkPosControl(MjxEnv):
         actuator_effort = jp.sum(data.data.qfrc_actuator**2)
 
         # Scale the penalty and subtract it from the reward
-        energy_efficiency_penalty = -0.01 * actuator_effort  # Adjust the weight as needed
+        energy_efficiency_penalty = -1e4 * actuator_effort  # Adjust the weight as needed
 
         # Integrate it into the reward
         reward += energy_efficiency_penalty
