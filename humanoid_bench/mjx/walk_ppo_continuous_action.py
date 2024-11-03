@@ -299,6 +299,7 @@ def make_train(config, writer):
                     standing = state_info['standing']
                     upright = state_info['upright']
                     actuator_effort = state_info['actuator_effort']
+                    energy_efficiency_penalty = state_info['energy_efficiency_penalty']
                     
                     if len(timesteps) > 0:
                         writer.add_scalar("train/episode_return", np.array(return_values.mean()), timesteps[-1])
@@ -309,7 +310,8 @@ def make_train(config, writer):
                         writer.add_scalar("train/standing", np.array(standing.mean()), timesteps[-1])
                         writer.add_scalar("train/upright", np.array(upright.mean()), timesteps[-1])
                         writer.add_scalar("train/actuator_effort", np.array(actuator_effort.mean()), timesteps[-1])
-                    
+                        writer.add_scalar("train/energy_efficiency_penalty", np.array(energy_efficiency_penalty.mean()), timesteps[-1])
+                        
                         if timesteps[-1] // (config["NUM_STEPS"] * config["NUM_ENVS"]) % 100 == 0:
                             print("Saving model")
                             save_folder = config["SAVE_FOLDER"]

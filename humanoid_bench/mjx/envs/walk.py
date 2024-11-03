@@ -95,84 +95,55 @@ class HumanoidWalkPosControl(MjxEnv):
                        "move": 0.,
                        "standing": 0.,
                        "upright": 0.,
-                       "actuator_effort": 0.
+                       "actuator_effort": 0.,
+                       "energy_efficiency_penalty": 0.
                        })
         
         return state
 
     def compute_reward(self, data):
-        """ 
-        R(s, a) = stable x tol(v_x, (1, +inf), 1)
-        stable = stand x e 
-        e = 0.2 x [ 4 + (1 / |u|) \sum_{i=1}^{n} tol(u_i, (0, 0), 10) ]
-        stand = height x upright 
-        height((x_l, x_u), m) = tol(x_head, (x_l, x_u), m), x_l = 1.65, x_u = +inf, m = 0.4125
-        upright((x_l, x_u), m) = tol(z_proj, (x_l, x_u), m), x_l = 0.9, x_u = +inf, m = 1.9 
-
-        termination if z_pelvis < 0.2
-        """
-        # Standing calculation
+        # Standing and upright calculations
         head_height = data.data.site_xpos[5, -1]
-        standing = tolerance(
-            head_height,
-            bounds=(self._stand_height, float("inf")),
-            margin=0.4125
-        )
+        standing = tolerance(head_height, bounds=(self._stand_height, float("inf")), margin=0.4125)
         
-        # Upright calculation
         torso_upright = data.data.xmat[1, 2, 2]
-        upright = tolerance(
-            torso_upright,
-            bounds=(0.9, float("inf")),
-            sigmoid="linear",
-            margin=1.9,
-            value_at_margin=0
-        )
+        upright = tolerance(torso_upright, bounds=(0.9, float("inf")), sigmoid="linear", margin=1.9, value_at_margin=0)
         stand_reward = standing * upright
 
         # Small control penalty
         actuator_force = data.data.qfrc_actuator
-        small_control = tolerance(
-            actuator_force,
-            margin=10,
-            value_at_margin=0,
-            sigmoid="quadratic"
-        ).mean()
+        small_control = tolerance(actuator_force, margin=10, value_at_margin=0, sigmoid="quadratic").mean()
         small_control = (4 + small_control) / 5
 
-        # Movement calculation: `move_speed != 0` case
+        # Movement calculation
         com_velocity = data.data.qvel[0]
-        move = tolerance(
-            com_velocity,
-            bounds=(self._move_speed, float("inf")),
-            margin=self._move_speed,
-            value_at_margin=0,
-            sigmoid="linear"
-        )
+        move = tolerance(com_velocity, bounds=(self._move_speed, float("inf")), margin=self._move_speed, value_at_margin=0, sigmoid="linear")
         move = (5 * move + 1) / 6
 
-        # Calculate reward based on whether `move_speed` is 0 or not
+        # Basic reward with movement
         reward = small_control * stand_reward * move
 
-        # Calculate the squared sum of actuator forces (energy penalty)
+        # Energy efficiency penalty calculation
         actuator_effort = jp.sum(data.data.qfrc_actuator**2)
+        normalized_effort = jp.sqrt(actuator_effort) / data.data.qfrc_actuator.shape[0]
+        energy_efficiency_penalty = -1e-4 * normalized_effort * stand_reward  # Adjust weight as needed
 
-        # Scale the penalty and subtract it from the reward
-        energy_efficiency_penalty = -1e4 * actuator_effort  # Adjust the weight as needed
-
-        # Integrate it into the reward
+        # Final reward integration
         reward += energy_efficiency_penalty
 
         # Termination condition
         terminated = jp.where(data.data.qpos[2] < 0.2, 1.0, 0.0)
-        reward = jp.where(jp.isnan(reward), -1, reward)
+        reward = jp.where(jp.isnan(reward), 0, reward)
 
-        sub_rewards = {"stand_reward": stand_reward, 
-                       "small_control": small_control, 
-                       "move": move,
-                       "standing": standing,
-                       "upright": upright,
-                       "actuator_effort": actuator_effort}
+        sub_rewards = {
+            "stand_reward": stand_reward, 
+            "small_control": small_control, 
+            "move": move,
+            "standing": standing,
+            "upright": upright,
+            "actuator_effort": actuator_effort,
+            "energy_efficiency_penalty": energy_efficiency_penalty
+        }
 
         return reward, terminated, sub_rewards
 
