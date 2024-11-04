@@ -35,20 +35,13 @@ def main(args):
         torch_model = TorchModel(55, 19)
     elif args.task == 'reach_two_hands':
         torch_model = TorchModel(61, 19)
-    elif args.task == 'walk':
+    elif args.task == 'walk' or args.task == 'stand':
         torch_model = TorchModel(51, 19)
     torch_policy = TorchPolicy(torch_model)
 
-    model_name = "torch_model_996147200.pt"
-    mean_name = "mean_996147200.npy"
-    var_name = "var_996147200.npy"
-
-    if args.step is not None:
-        model_name = model_name.split(".")[0] + f"_{args.step}." + model_name.split(".")[1]
-        mean_name = mean_name.split(".")[0] + f"_{args.step}." + mean_name.split(".")[1]
-        var_name = var_name.split(".")[0] + f"_{args.step}." + var_name.split(".")[1]
-
-    torch_policy.load(os.path.join(args.folder, model_name), mean=os.path.join(args.folder, mean_name), var=os.path.join(args.folder, var_name))
+    torch_policy.load(args.model_file,
+                    mean=args.model_file.replace('torch_model', 'mean').replace('.pt', '.npy'), 
+                    var=args.model_file.replace('torch_model', 'var').replace('.pt', '.npy'))
     
     m, d = env.model, env.data
 
@@ -75,7 +68,9 @@ def main(args):
                     break
             all_rewards.append(reward)
             all_videos.append(np.array(video))
-        make_grid_video_from_numpy(all_videos, 1, output_name=os.path.join(args.folder, "evaluation.mp4"), **{'fps': 50})
+        make_grid_video_from_numpy(all_videos, 1, 
+                                   output_name=args.model_file.replace('torch_model', 'evaluation').replace('.pt', '.mp4'), 
+                                   **{'fps': 50})
         print("Rewards:", all_rewards)
     else:
         renderer = mujoco.Renderer(m, height=480, width=480)
@@ -100,9 +95,8 @@ if __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--folder', type=str, default='./data/reach_one_hand/')
+    parser.add_argument('--model_file', type=str, default='./data/reach_one_hand/torch_model.pt')
     parser.add_argument('--task', type=str, default='reach')
-    parser.add_argument('--step', type=int, default=None)
     parser.add_argument('--render', action='store_true', default=False)
     parser.add_argument('--with_full_model', action='store_true', default=False)
     args = parser.parse_args()
