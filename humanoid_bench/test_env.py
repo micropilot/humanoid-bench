@@ -69,6 +69,7 @@ if __name__ == "__main__":
     env.render()
     ret = 0
     while True:
+        print (env.robot.torso_upright(), env.data.xmat[1])
         action = env.action_space.sample()
         ob, rew, terminated, truncated, info = env.step(action)
         img = env.render()

@@ -103,7 +103,7 @@ class HumanoidWalkPosControl(MjxEnv):
 
     def compute_reward(self, data):
         # Standing and upright calculations
-        head_height = data.data.site_xpos[5, -1]
+        head_height = data.data.site_xpos[2, -1]
         standing = tolerance(head_height, bounds=(self._stand_height, float("inf")), margin=0.4125)
         
         torso_upright = data.data.xmat[1, 2, 2]

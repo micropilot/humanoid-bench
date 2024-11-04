@@ -103,7 +103,7 @@ class HumanoidRunPosControl(MjxEnv):
 
     def compute_reward(self, data):
         # Standing and upright calculations
-        head_height = data.data.site_xpos[5, -1]
+        head_height = data.data.site_xpos[2, -1]
         standing = tolerance(head_height, bounds=(self._stand_height, float("inf")), margin=0.4125)
         
         torso_upright = data.data.xmat[1, 2, 2]
@@ -194,9 +194,6 @@ class HumanoidRunPosControl(MjxEnv):
      )
     
     def _get_obs(self, data) -> jp.ndarray:
-        offset = jp.array([data.qpos[0], data.qpos[1], 0])
-        return jp.concatenate([data.qpos[self.body_idxs][2:],
-                data.qvel[self.body_vel_idxs],
-                data.site_xpos[4]-offset,
-                data.site_xpos[5]-offset])
+        return jp.concatenate([data.qpos[self.body_idxs],
+                data.qvel[self.body_vel_idxs]])
 

@@ -27,19 +27,19 @@ def test_walk_task():
     state = env.reset(rng)
     
     # Print initial observation
-    print("Initial Observation:", state.obs.shape)
+    # print("Initial Observation:", state.obs.shape)
 
     # Run a sample episode
-    for step in range(10):  # Test with a few steps
+    for step in range(1):  # Test with a few steps
         action = jp.ones(env.low_action.shape) * 0.5 # Zero action for testing
-        print ("Action: ", action.shape)
+        # print ("Action: ", action.shape)
         state = env.step(state, action)
         
         # Print the results of each step
-        print(f"Step {step+1}")
-        print("Observation:", state.obs)
-        print("Reward:", state.reward)
-        print("Terminated:", state.done)
+        # print(f"Step {step+1}")
+        # print("Observation:", state.obs)
+        # print("Reward:", state.reward)
+        # print("Terminated:", state.done)
         
         if state.done:
             print("Terminated early!")
