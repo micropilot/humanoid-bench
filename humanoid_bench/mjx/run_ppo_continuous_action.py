@@ -356,8 +356,8 @@ def main(_):
     logdir = os.path.join(save_folder, "logs")
     writer = SummaryWriter(logdir)
 
-    env_name = "h1_walk" 
-    if env_name == 'h1_walk':
+    env_name = "h1_run" 
+    if env_name == 'h1_run':
         dimU = 19
         dimO = 51
     else:
