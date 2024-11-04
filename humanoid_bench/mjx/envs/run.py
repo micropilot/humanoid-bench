@@ -194,6 +194,9 @@ class HumanoidRunPosControl(MjxEnv):
      )
     
     def _get_obs(self, data) -> jp.ndarray:
-        return jp.concatenate([data.qpos[self.body_idxs],
-                data.qvel[self.body_vel_idxs]])
+        offset = jp.array([data.qpos[0], data.qpos[1], 0])
+        return jp.concatenate([data.qpos[self.body_idxs][2:],
+                data.qvel[self.body_vel_idxs],
+                data.site_xpos[4]-offset,
+                data.site_xpos[5]-offset])
 
