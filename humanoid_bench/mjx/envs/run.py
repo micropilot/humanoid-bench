@@ -16,7 +16,7 @@ class HumanoidRunPosControl(MjxEnv):
         collisions = kwargs.get('collisions', 'feet')
         act_control = kwargs.get('act_control', 'pos')
 
-        path = "./humanoid_bench/assets/mjx/h1_pos_walk.xml"
+        path = "./humanoid_bench/assets/mjx/h1_pos_run.xml"
 
         del kwargs['collisions']
         del kwargs['act_control']
