@@ -368,7 +368,7 @@ def main(_):
         "SAVE_FOLDER": save_folder,
         "LR": 3e-4, 
         "NUM_ENVS": 32768, 
-        "NUM_STEPS": 128, 
+        "NUM_STEPS": 16, 
         "TOTAL_TIMESTEPS": 1e9,
         "UPDATE_EPOCHS": 4, 
         "NUM_MINIBATCHES": 32, 

@@ -24,9 +24,9 @@ def update(img):
 
 def main(args):
     if args.with_full_model:
-        env = HumanoidNumpyEnv('./humanoid_bench/assets/mjx/scene_test_mesh_collisions_hands_two_targets_pos.xml', task=args.task)
+        env = HumanoidNumpyEnv('./humanoid_bench/assets/mjx/h1_pos_walk.xml', task=args.task)
     else:
-        env = HumanoidNumpyEnv('./humanoid_bench/assets/mjx/scene_mjx_feet_collisions_two_targets_pos.xml', task=args.task)
+        env = HumanoidNumpyEnv('./humanoid_bench/assets/mjx/h1_pos_walk.xml', task=args.task)
     
     state = env.reset()
     print("State:", state)

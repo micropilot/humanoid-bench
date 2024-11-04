@@ -80,10 +80,10 @@ class HumanoidNumpyEnv():
             0,
             0, 0, 0, 0,
             0, 0, 0, 0,
-            0, 0.1, 0.05,  # for reaching
-            1, 0, 0, 0, # for reaching
-            0, -0.1, 0.05,  # for reaching
-            1, 0, 0, 0, # for reaching
+            # 0, 0.1, 0.05,  # for reaching
+            # 1, 0, 0, 0, # for reaching
+            # 0, -0.1, 0.05,  # for reaching
+            # 1, 0, 0, 0, # for reaching
             ])  
         except:
             self.data.qpos = np.array(
@@ -94,12 +94,12 @@ class HumanoidNumpyEnv():
             0,
             0, 0, 0, 0,
             0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0.1, 0.05,  # for reaching
-            1, 0, 0, 0, # for reaching
-            0, -0.1, 0.05,  # for reaching
-            1, 0, 0, 0, # for reaching
+            # 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            # 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            # 0, 0.1, 0.05,  # for reaching
+            # 1, 0, 0, 0, # for reaching
+            # 0, -0.1, 0.05,  # for reaching
+            # 1, 0, 0, 0, # for reaching
             ])  
         self.data.qvel[:] = 0
 
@@ -131,17 +131,17 @@ class HumanoidNumpyEnv():
         return (action + 1) / 2 * (self.high_action - self.low_action) + self.low_action
 
     def compute_reward(self, data):
-        lef_hand_dist = np.sqrt(np.square(data.site('left_hand').xpos - data.qpos[self.left_target_idxs]).sum())
-        right_hand_dist = np.sqrt(np.square(data.site('right_hand').xpos - data.qpos[self.right_target_idxs]).sum())
-        if self.task == 'reach':
-            dist = lef_hand_dist
-        elif self.task == 'reach_two_hands':
-            dist = np.max((lef_hand_dist, right_hand_dist))
-        elif self.task == 'walk':
+        # lef_hand_dist = np.sqrt(np.square(data.site('left_hand').xpos - data.qpos[self.left_target_idxs]).sum())
+        # right_hand_dist = np.sqrt(np.square(data.site('right_hand').xpos - data.qpos[self.right_target_idxs]).sum())
+        # if self.task == 'reach':
+            # dist = lef_hand_dist
+        # elif self.task == 'reach_two_hands':
+            # dist = np.max((lef_hand_dist, right_hand_dist))
+        if self.task == 'walk' or self.task == 'stand':
             dist = np.sqrt(np.square(data.qpos[0:2]).sum())
         reward = float(dist < 0.1) # Trained with 0.05, but 0.1 allows to evaluate the policy for a wider range of targets
         height = data.qpos[2]
-        terminated = (height < 0.3) or (height > 1.2)
+        terminated = (height < 0.3) or (height > 1.6)
         return reward, terminated
 
     def step(self, action: np.ndarray) -> Tuple[np.ndarray, float, bool, Dict]:
@@ -166,14 +166,9 @@ class HumanoidNumpyEnv():
                 self.data.qpos[self.left_target_idxs] = left_target
                 self.data.qpos[self.right_target_idxs] = right_target
                 mujoco.mj_forward(self.model, self.data)
-        elif self.task == 'walk':
-            if self.data.qpos[0] > 2.0:
-                self.data.qpos[0] = -2.0
-                self.data.qpos[1] = 0.0
-                self.data.qpos[2] = 0.98
-                self.data.qvel[0] = 0.0
-                self.data.qvel[1] = 0.0
-                self.data.qvel[2] = 0.0
+        elif self.task == 'walk' or self.task == 'stand':
+            if reward > 0.9:
+                print ('Reward: ', reward)
                 mujoco.mj_forward(self.model, self.data)
 
         return self._get_obs(self.data), reward, done, {}
@@ -202,7 +197,7 @@ class HumanoidNumpyEnv():
                     data.qpos.copy()[self.right_target_idxs] - offset
                 )
             )
-        elif self.task == 'walk':
+        elif self.task == 'walk' or self.task == 'stand':
             return np.concatenate(
                 (
                     data.qpos.copy()[self.body_idxs],
