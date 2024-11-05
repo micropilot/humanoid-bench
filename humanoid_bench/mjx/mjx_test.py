@@ -35,7 +35,7 @@ def main(args):
         torch_model = TorchModel(55, 19)
     elif args.task == 'reach_two_hands':
         torch_model = TorchModel(61, 19)
-    elif args.task == 'walk' or args.task == 'stand':
+    elif args.task == 'walk' or args.task == 'stand' or args.task == 'run':
         torch_model = TorchModel(51, 19)
     torch_policy = TorchPolicy(torch_model)
 
@@ -82,7 +82,7 @@ def main(args):
                 renderer.update_scene(d, camera='cam_default')
                 img = renderer.render()
                 
-                # time.sleep(0.02)
+                time.sleep(0.02)
                 yield img
 
         fig = plt.figure(figsize=(6, 6))
