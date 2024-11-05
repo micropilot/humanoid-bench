@@ -298,8 +298,6 @@ def make_train(config, writer):
                     dont_move = state_info['dont_move']
                     standing = state_info['standing']
                     upright = state_info['upright']
-                    actuator_effort = state_info['actuator_effort']
-                    energy_efficiency_penalty = state_info['energy_efficiency_penalty']
                     
                     if len(timesteps) > 0:
                         writer.add_scalar("train/episode_return", np.array(return_values.mean()), timesteps[-1])
@@ -309,9 +307,7 @@ def make_train(config, writer):
                         writer.add_scalar("train/dont_move", np.array(dont_move.mean()), timesteps[-1])
                         writer.add_scalar("train/standing", np.array(standing.mean()), timesteps[-1])
                         writer.add_scalar("train/upright", np.array(upright.mean()), timesteps[-1])
-                        writer.add_scalar("train/actuator_effort", np.array(actuator_effort.mean()), timesteps[-1])
-                        writer.add_scalar("train/energy_efficiency_penalty", np.array(energy_efficiency_penalty.mean()), timesteps[-1])
-
+                       
                         if timesteps[-1] // (config["NUM_STEPS"] * config["NUM_ENVS"]) % 100 == 0:
                             print("Saving model")
                             save_folder = config["SAVE_FOLDER"]
@@ -383,13 +379,7 @@ def main(_):
         "ENV_KWARGS": {'collisions': 'feet',
                        'act_control': 'pos',
                        # l1 and l2 are curriculum rewards
-                       'reward_weights_dict': {'alive': 1.0,
-                                               'vel': 1.0,
-                                               'l1_weight': 1.0,
-                                               'l1_dist': 0.05,
-                                               'l2_weight': 2.0,
-                                               'l2_dist': 0.3
-                                               }
+                       'reward_weights_dict': {}
                        },
         "ANNEAL_LR": True,
         "NORMALIZE_ENV": True,

@@ -95,15 +95,13 @@ class HumanoidStandPosControl(MjxEnv):
                        "dont_move": 0.,
                        "standing": 0.,
                        "upright": 0.,
-                       "actuator_effort": 0.,
-                       "energy_efficiency_penalty": 0.
                        })
         
         return state
 
     def compute_reward(self, data):
         # Standing and upright calculations
-        head_height = data.data.site_xpos[5, -1]
+        head_height = data.data.site_xpos[2, -1]
         standing = tolerance(head_height, bounds=(self._stand_height, float("inf")), margin=0.4125)
         
         torso_upright = data.data.xmat[1, 2, 2]
@@ -122,14 +120,6 @@ class HumanoidStandPosControl(MjxEnv):
         # Basic reward with movement
         reward = small_control * stand_reward * dont_move
 
-        # Energy efficiency penalty calculation
-        actuator_effort = jp.sum(data.data.qfrc_actuator**2)
-        normalized_effort = jp.sqrt(actuator_effort) / data.data.qfrc_actuator.shape[0]
-        energy_efficiency_penalty = -1e-2 * normalized_effort * stand_reward  # Adjust weight as needed
-
-        # Final reward integration
-        reward += energy_efficiency_penalty
-
         # Termination condition
         terminated = jp.where(data.data.qpos[2] < 0.2, 1.0, 0.0)
         reward = jp.where(jp.isnan(reward), 0, reward)
@@ -140,8 +130,6 @@ class HumanoidStandPosControl(MjxEnv):
             "dont_move": dont_move,
             "standing": standing,
             "upright": upright,
-            "actuator_effort": actuator_effort,
-            "energy_efficiency_penalty": energy_efficiency_penalty
         }
 
         return reward, terminated, sub_rewards
